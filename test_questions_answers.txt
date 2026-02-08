@@ -1,0 +1,138 @@
+================================================================================
+BỘ CÂU HỎI VÀ CÂU TRẢ LỜI MONG MUỐN ĐỂ ĐÁNH GIÁ HỆ THỐNG RAG
+Dựa trên 3 văn bản: Lãi suất ngân hàng, Hòa Phát HPG, Thị trường vàng
+================================================================================
+
+========== VĂN BẢN 1: LÃI SUẤT NGÂN HÀNG ==========
+
+1. Câu hỏi: Sacombank đã điều chỉnh lãi suất như thế nào trong tháng 2/2026?
+   Câu trả lời mong muốn: Sacombank giảm 0,2 điểm % ở các kỳ hạn dưới 6 tháng. Lãi suất kỳ hạn 1 tháng còn 2,8%/năm, kỳ hạn 3 tháng còn 3,1%/năm.
+   Loại: fact_extraction | Độ khó: easy
+
+2. Câu hỏi: Ngân hàng nào tăng lãi suất và tăng bao nhiêu?
+   Câu trả lời mong muốn: VIB tăng nhẹ lãi suất kỳ hạn 12 tháng thêm 0,1 điểm %, lên mức 5,4%/năm để thu hút dòng vốn trung hạn.
+   Loại: fact_extraction | Độ khó: medium
+
+3. Câu hỏi: Lãi suất kỳ hạn 12 tháng của Vietcombank là bao nhiêu?
+   Câu trả lời mong muốn: 4,6%/năm, thấp nhất hệ thống.
+   Loại: fact_extraction | Độ khó: easy
+
+4. Câu hỏi: Tại sao các chuyên gia dự báo lãi suất khó giảm sâu thêm nữa?
+   Câu trả lời mong muốn: Do áp lực tỷ giá USD/VND đang tăng trở lại trong bối cảnh Fed chưa hạ lãi suất.
+   Loại: reasoning | Độ khó: medium
+
+5. Câu hỏi: So sánh xu hướng lãi suất giữa Sacombank và VIB trong tháng 2/2026?
+   Câu trả lời mong muốn: Sacombank giảm lãi suất 0,2 điểm % ở kỳ hạn dưới 6 tháng, trong khi VIB tăng lãi suất 0,1 điểm % ở kỳ hạn 12 tháng. Có sự phân hóa trong xu hướng điều chỉnh lãi suất.
+   Loại: comparison | Độ khó: hard
+
+========== VĂN BẢN 2: HÒA PHÁT HPG ==========
+
+6. Câu hỏi: Doanh thu Quý 4/2025 của Hòa Phát là bao nhiêu?
+   Câu trả lời mong muốn: 35.000 tỷ đồng, tăng trưởng 25% so với cùng kỳ năm 2024.
+   Loại: fact_extraction | Độ khó: easy
+
+7. Câu hỏi: Lợi nhuận sau thuế năm 2025 của Hòa Phát tăng hay giảm so với năm trước?
+   Câu trả lời mong muốn: Giảm nhẹ 5%, về mức 8.500 tỷ đồng.
+   Loại: fact_extraction | Độ khó: easy
+
+8. Câu hỏi: Tại sao lợi nhuận Hòa Phát giảm trong năm 2025?
+   Câu trả lời mong muốn: Nguyên nhân chủ yếu đến từ việc chi phí đầu vào (quặng sắt, than cốc) tăng cao trong nửa cuối năm.
+   Loại: reasoning | Độ khó: medium
+
+9. Câu hỏi: Sản lượng thép xây dựng của Hòa Phát năm 2025 là bao nhiêu?
+   Câu trả lời mong muốn: 4,5 triệu tấn, tăng 12% so với năm trước.
+   Loại: fact_extraction | Độ khó: easy
+
+10. Câu hỏi: Ngành nông nghiệp đóng góp bao nhiêu vào lợi nhuận của Hòa Phát?
+    Câu trả lời mong muốn: 5% vào tổng lợi nhuận, tương đương 425 tỷ đồng.
+    Loại: fact_extraction | Độ khó: easy
+
+11. Câu hỏi: Mục tiêu của Hòa Phát năm 2026 là gì?
+    Câu trả lời mong muốn: Phục hồi biên lợi nhuận gộp lên mức 15% nhờ việc đưa vào vận hành lò cao Dung Quất 2.
+    Loại: fact_extraction | Độ khó: medium
+
+12. Câu hỏi: So sánh tốc độ tăng trưởng giữa doanh thu và lợi nhuận của Hòa Phát năm 2025?
+    Câu trả lời mong muốn: Doanh thu tăng mạnh (Quý 4 tăng 25%), nhưng lợi nhuận sau thuế lại giảm 5% do chi phí đầu vào tăng cao, cho thấy biên lợi nhuận bị thu hẹp.
+    Loại: comparison | Độ khó: hard
+
+========== VĂN BẢN 3: THỊ TRƯỜNG VÀNG ==========
+
+13. Câu hỏi: Giá vàng SJC sáng ngày 2/2/2026 là bao nhiêu?
+    Câu trả lời mong muốn: 85,5 triệu đồng/lượng (mua vào) và 88,5 triệu đồng/lượng (bán ra).
+    Loại: fact_extraction | Độ khó: easy
+
+14. Câu hỏi: Chênh lệch giá mua - bán vàng SJC là bao nhiêu?
+    Câu trả lời mong muốn: 3 triệu đồng/lượng, được nới rộng và đẩy rủi ro về phía người mua.
+    Loại: fact_extraction | Độ khó: easy
+
+15. Câu hỏi: Giá vàng nhẫn trơn tại Bảo Tín Minh Châu đạt mức nào?
+    Câu trả lời mong muốn: 78 triệu đồng/lượng, lập đỉnh mới lịch sử.
+    Loại: fact_extraction | Độ khó: easy
+
+16. Câu hỏi: Giá vàng SJC chiều ngày 2/2/2026 thay đổi như thế nào?
+    Câu trả lời mong muốn: Giảm 500.000 đồng/lượng, xuống còn 88 triệu đồng/lượng chiều bán ra do áp lực chốt lời.
+    Loại: fact_extraction | Độ khó: medium
+
+17. Câu hỏi: Tại sao giới phân tích cảnh báo nhà đầu tư cần thận trọng với vàng?
+    Câu trả lời mong muốn: Vì giá vàng đang ở vùng đỉnh cao và chỉ số DXY (sức mạnh đồng USD) đang có dấu hiệu phục hồi từ mức 102 điểm, có thể gây áp lực giảm lên giá vàng.
+    Loại: reasoning | Độ khó: hard
+
+18. Câu hỏi: Xu hướng giá vàng trong ngày 2/2/2026 diễn biến như thế nào?
+    Câu trả lời mong muốn: Sáng tăng mạnh theo đà thế giới (SJC lên 88,5 triệu đồng/lượng bán ra), chiều quay đầu giảm 500.000 đồng/lượng xuống 88 triệu đồng/lượng do chốt lời.
+    Loại: comparison | Độ khó: medium
+
+========== CÂU HỎI ĐA VĂN BẢN (CROSS-DOCUMENT) ==========
+
+19. Câu hỏi: Có bao nhiêu ngân hàng được nhắc đến trong văn bản về lãi suất?
+    Câu trả lời mong muốn: 6 ngân hàng: Sacombank, VIB, Vietcombank, BIDV, Agribank, VietinBank (trong đó có nhóm Big4).
+    Loại: counting | Độ khó: medium
+
+20. Câu hỏi: Những yếu tố nào ảnh hưởng đến lãi suất và giá vàng theo văn bản?
+    Câu trả lời mong muốn: Cả hai đều chịu ảnh hưởng từ chỉ số USD: lãi suất khó giảm do áp lực USD/VND tăng và Fed chưa hạ lãi suất; giá vàng có rủi ro giảm do chỉ số DXY (sức mạnh USD) phục hồi.
+    Loại: reasoning | Độ khó: hard
+
+========== CÂU HỎI NEGATIVE (KHÔNG CÓ TRONG VĂN BẢN) ==========
+
+21. Câu hỏi: Giá cổ phiếu HPG hiện tại là bao nhiêu?
+    Câu trả lời mong muốn: Không có thông tin trong văn bản.
+    Loại: negative | Độ khó: easy
+
+22. Câu hỏi: Chính sách tiền tệ của Ngân hàng Nhà nước trong năm 2026 như thế nào?
+    Câu trả lời mong muốn: Không có thông tin chi tiết trong văn bản.
+    Loại: negative | Độ khó: medium
+
+================================================================================
+THỐNG KÊ
+================================================================================
+
+Tổng số câu hỏi: 22
+
+Phân loại theo category:
+  - fact_extraction: 12 câu (54.5%)
+  - reasoning: 4 câu (18.2%)
+  - comparison: 4 câu (18.2%)
+  - counting: 1 câu (4.5%)
+  - negative: 2 câu (9.1%)
+
+Phân loại theo độ khó:
+  - easy: 10 câu (45.5%)
+  - medium: 8 câu (36.4%)
+  - hard: 4 câu (18.2%)
+
+================================================================================
+HƯỚNG DẪN SỬ DỤNG
+================================================================================
+
+Để đánh giá hệ thống RAG, bạn có thể:
+
+1. Chạy từng câu hỏi qua hệ thống
+2. So sánh câu trả lời thực tế với câu trả lời mong muốn
+3. Tính các metrics:
+   - Accuracy: Số câu trả lời đúng / Tổng số câu
+   - Precision/Recall cho từng loại câu hỏi
+   - F1-Score tổng thể
+
+4. Đánh giá đặc biệt:
+   - Câu hỏi negative: Hệ thống có trả lời "không biết" đúng không?
+   - Câu hỏi reasoning: Có giải thích nguyên nhân chính xác không?
+   - Câu hỏi comparison: Có so sánh đầy đủ các yếu tố không?
