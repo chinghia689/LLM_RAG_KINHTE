@@ -1,1 +1,62 @@
+# ========== Biến môi trường (chứa API key, mật khẩu) ==========
 .env
+.env.local
+.env.production
+
+# ========== Dataset lớn ==========
+Dataset_economy/
+
+# ========== ChromaDB database (rất nặng) ==========
+chroma_economy_db/
+chroma_cosine/
+chroma_db/
+*.sqlite3
+**/data_level0.bin
+**/header.bin
+**/length.bin
+**/link_lists.bin
+
+# ========== Python cache & bytecode ==========
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# ========== Python virtual environment ==========
+venv/
+.venv/
+env/
+ai_env/
+
+# ========== Jupyter Notebook ==========
+.ipynb_checkpoints/
+
+# ========== IDE / Editor ==========
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ========== OS files ==========
+.DS_Store
+Thumbs.db
+
+# ========== Log files ==========
+*.log
+logs/
+
+# ========== Model files (nặng) ==========
+*.bin
+*.h5
+*.pt
+*.pth
+*.onnx
+*.pkl
+*.pickle
+
+# ========== Tệp nén dữ liệu ==========
+*.zip
+*.tar.gz
+*.rar
+*.7z
