@@ -62,23 +62,23 @@ class LLM:
     #     )
     #     return llm
 
-    def gemini(self):
-        """
-        Khởi tạo LLM từ Google Gemini API.
+    # def gemini(self):
+    #     """
+    #     Khởi tạo LLM từ Google Gemini API.
 
-        Yêu cầu biến môi trường:
-            - KEY_API_GOOGLE
-            - GOOGLE_LLM_MODEL_NAME
+    #     Yêu cầu biến môi trường:
+    #         - KEY_API_GOOGLE
+    #         - GOOGLE_LLM_MODEL_NAME
 
-        Returns:
-            ChatGoogleGenerativeAI: đối tượng LLM Gemini.
-        """
-        llm = ChatGoogleGenerativeAI(
-            google_api_key=os.environ["GOOGLE_API_KEY"],
-            model=os.environ["GOOGLE_LLM_MODEL_NAME"],
-            temperature=self.temperature,
-        )
-        return llm
+    #     Returns:
+    #         ChatGoogleGenerativeAI: đối tượng LLM Gemini.
+    #     """
+    #     llm = ChatGoogleGenerativeAI(
+    #         google_api_key=os.environ["GOOGLE_API_KEY"],
+    #         model=os.environ["GOOGLE_LLM_MODEL_NAME"],
+    #         temperature=self.temperature,
+    #     )
+    #     return llm
 
     def groq(self):
         """
@@ -92,7 +92,7 @@ class LLM:
         """
         llm = ChatGroq(
             api_key=os.environ["GROQ_API_KEY"],
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",
             temperature=self.temperature,
         )
         return llm
@@ -126,8 +126,8 @@ class LLM:
         # if llm_name == "openai":
         #     return self.open_ai()
 
-        if llm_name == "gemini":
-            return self.gemini()
+        # if llm_name == "gemini":
+        #     return self.gemini()
 
         if llm_name == "groq":
             return self.groq()

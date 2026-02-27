@@ -1,18 +1,11 @@
-import os
 import re
 from typing import Dict, Any
-import sys
-from pathlib import Path
-
-# Thêm đường dẫn ingestion vào sys.path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "ingestion"))
 
 from ingestion.energy_kmeans import EnergyRetriever
 from ingestion.model_embedding import vn_embedder
 from ingestion.chunks_document import ChromaDBManager
 from chatbot.utils.document_grader import DocumentGrader
 from chatbot.utils.answer_generator import AnswerGeneratorDocs
-from chatbot.utils.llm import LLM
 from langgraph.graph import END, StateGraph, START
 from chatbot.utils.graph_state import GraphState
 
@@ -65,6 +58,17 @@ class FilesChatAgent:
                 persist_directory=path_vector_store,
                 embedding_function=self.embeddings
             )
+        
+        # Khởi tạo Energy Retriever MỘT LẦN (tránh tạo lại mỗi query)
+        self.energy_retriever = EnergyRetriever(
+            vector_store=self.vector_store,
+            embeddings_model=self.embeddings,
+            k_retrieve=40,
+            k_clusters=7,
+            similarity_threshold=0.50,
+            n_top_clusters=2,
+            max_final_docs=15
+        )
 
     def handle_no_answer(self, state: GraphState) -> Dict[str, Any]:
         """
@@ -96,9 +100,9 @@ class FilesChatAgent:
             score = self.document_grader.get_chain().invoke(
                 {"question": question, "document": doc.page_content}
             )
-            # Lấy điểm từ output
-            grade = str(score).lower().strip()
-            if "yes" in grade:
+            # Lấy điểm từ output (StrOutputParser trả về string thuần)
+            grade = score.lower().strip()
+            if grade == "yes":
                 filtered_docs.append(doc)
                 print(f"✅ Tài liệu liên quan: {doc.metadata.get('source', 'N/A')}")
             else:
@@ -166,17 +170,8 @@ class FilesChatAgent:
         """
         question = state["question"]
 
-        # Khởi tạo Energy Retriever
-        energy_retriever = EnergyRetriever(
-            vector_store=self.vector_store,
-            embeddings_model=self.embeddings,
-            k_retrieve=30,
-            k_clusters=7,
-            similarity_threshold=0.40
-        )
-
         # Lấy danh sách documents liên quan dùng Energy Distance
-        documents = energy_retriever.retrieve(query=question)
+        documents = self.energy_retriever.retrieve(query=question)
 
         return {"documents": documents, "question": question}
 

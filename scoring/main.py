@@ -7,12 +7,12 @@ from pathlib import Path
 # Thêm parent folder vào path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from evaluation_metric.rouge_n import rouge_excel
-from evaluation_metric.bleu import bleu_excel
-from evaluation_metric.cosine_similarity import cosine_excel
-from evaluation_metric.mrr import mrr_excel
-from evaluation_metric.hit_rate import hit_rate_excel
-from evaluation_metric.ndcg import ndcg_excel
+from scoring.evaluation_metric.rouge_n import rouge_excel
+from scoring.evaluation_metric.bleu import bleu_excel
+from scoring.evaluation_metric.cosine_similarity import cosine_excel
+from scoring.evaluation_metric.mrr import mrr_excel
+from scoring.evaluation_metric.hit_rate import hit_rate_excel
+from scoring.evaluation_metric.ndcg import ndcg_excel
 
 
 def evaluate_results(file_path, embeddings):

@@ -23,7 +23,6 @@ from chatbot.services.files_rag_chat_agent import FilesChatAgent
 from chatbot.utils.graph_state import GraphState
 
 
-DIR_ROOT = Path(__file__).parent.parent
 class ChatbotRunner:
     """
     Runner chính để chạy chatbot ứng dụng.
@@ -66,8 +65,9 @@ class ChatbotRunner:
             str: Câu trả lời từ chatbot
         """
         if not prompt:
-            prompt = """Bạn là một chuyên gia tư vấn kinh tế Việt Nam. 
-Hãy trả lời câu hỏi một cách chính xác, có cơ sở, và hữu ích cho người dùng."""
+            prompt = """Bạn là một chuyên gia tư vấn kinh tế Việt Nam.
+Hãy trả lời câu hỏi CHỈ dựa trên thông tin trong ngữ cảnh được cung cấp.
+Nếu ngữ cảnh không chứa thông tin cần thiết, hãy nói rõ là không có thông tin."""
 
         print(f"\n{'='*60}")
         print(f"📝 Câu hỏi: {question}")

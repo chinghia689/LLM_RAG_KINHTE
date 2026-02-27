@@ -18,7 +18,12 @@ class AnswerGeneratorDocs:
             [
                 ("system", CustomPrompt.GENERATE_ANSWER_PROMPT),
                 ("system", "{prompt}"),
-                ("human", " User question: {question} \n\n Context: {context}"),
+                ("human", """Ngữ cảnh (CHỈ sử dụng thông tin trong đây):
+---
+{context}
+---
+
+Câu hỏi: {question}"""),
             ]
         )
         self.chain = prompt | llm | StrOutputParser()
