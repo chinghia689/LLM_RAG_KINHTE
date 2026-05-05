@@ -1,29 +1,29 @@
 """
-Quan ly cau hinh ung dung tu file .env.
-Su dung Pydantic Settings de dam bao validation va type safety.
+Quản lý cấu hình ứng dụng từ file .env.
+Sử dụng dotenv để load biến môi trường.
 
-Tham chieu: docs/DOCS-main/skill_env_configuration.md
+Tham chiếu: docs/DOCS-main/skill_env_configuration.md
 """
 
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Tim file .env tu thu muc goc du an
+# Tìm file .env từ thư mục gốc dự án
 _env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(_env_path)
 
 
 class Settings:
     """
-    Cau hinh chung cho toan bo ung dung.
-    DIR_ROOT duoc xac dinh tu vi tri file .env de tranh loi duong dan tuong doi.
+    Cấu hình chung cho toàn bộ ứng dụng.
+    DIR_ROOT được xác định từ vị trí file .env để tránh lỗi đường dẫn tương đối.
     """
 
-    # Thu muc goc cua du an (dua tren vi tri file .env)
+    # Thư mục gốc của dự án (dựa trên vị trí file .env)
     DIR_ROOT: str = str(Path(__file__).parent.parent)
 
-    # Moi truong: development hoac production
+    # Môi trường: development hoặc production
     ENV: str = os.getenv("ENV", "production")
 
     # AI Engine

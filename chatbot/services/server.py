@@ -1,12 +1,12 @@
 """
-FastAPI Server cho Chatbot Kinh Te Viet Nam.
+FastAPI Server cho Chatbot Kinh Tế Việt Nam.
 
-Khoi dong:
+Khởi động:
     python chatbot/services/server.py
-    hoac:
+    hoặc:
     uvicorn chatbot.services.server:app --host 0.0.0.0 --port 8001 --reload
 
-Tham chieu:
+Tham chiếu:
     - docs/DOCS-main/skill_api_response_standard.md
     - docs/DOCS-main/skill_logging_monitoring.md
     - docs/DOCS-main/skill_coding_conventions.md
@@ -45,13 +45,13 @@ logger = get_logger(__name__)
 # Pydantic Models (Request/Response)
 # ------------------------------------------------------------------
 class ChatRequest(BaseModel):
-    """Schema cho yeu cau chat tu Frontend."""
+    """Schema cho yêu cầu chat từ Frontend."""
     question: str
     llm_provider: Optional[str] = None
 
 
 class ChatResponseData(BaseModel):
-    """Du lieu tra ve trong response chat."""
+    """Dữ liệu trả về trong response chat."""
     answer: str
     sources: list[dict]
     response_time: float
@@ -60,7 +60,7 @@ class ChatResponseData(BaseModel):
 
 
 class HealthData(BaseModel):
-    """Du lieu tra ve trong response health check."""
+    """Dữ liệu trả về trong response health check."""
     status: str
     llm_provider: str
     vector_store: str
@@ -68,17 +68,17 @@ class HealthData(BaseModel):
 
 
 # ------------------------------------------------------------------
-# Helper: Lay user email tu JWT token
+# Helper: Lấy user email từ JWT token
 # ------------------------------------------------------------------
 def get_user_email_from_token(authorization: str = None) -> str | None:
     """
-    Trich xuat email tu Authorization header (Bearer token).
+    Trích xuất email từ Authorization header (Bearer token).
 
     Args:
-        authorization: Gia tri Authorization header.
+        authorization: Giá trị Authorization header.
 
     Returns:
-        Email cua user hoac None neu token khong hop le.
+        Email của user hoặc None nếu token không hợp lệ.
     """
     if not authorization:
         return None
@@ -103,13 +103,13 @@ is_ready = False
 
 
 def get_chatbot() -> ChatbotRunner:
-    """Lay chatbot instance, raise 503 neu chua san sang."""
+    """Lấy chatbot instance, raise 503 nếu chưa sẵn sàng."""
     global chatbot_instance, is_ready
     if chatbot_instance is None:
         raise HTTPException(
             status_code=503,
             detail=ApiError(
-                message="Chatbot dang khoi tao, vui long thu lai sau.",
+                message="Chatbot đang khởi tạo, vui lòng thử lại sau.",
                 error_code="SERVICE_UNAVAILABLE"
             ).model_dump()
         )
@@ -118,14 +118,14 @@ def get_chatbot() -> ChatbotRunner:
 
 @asynccontextmanager
 async def lifespan(app):
-    """Khoi tao chatbot khi server start, don dep khi shutdown."""
+    """Khởi tạo chatbot khi server start, dọn dẹp khi shutdown."""
     global chatbot_instance, is_ready
 
-    logger.info("Dang khoi tao Chatbot Server...")
+    logger.info("Đang khởi tạo Chatbot Server...")
 
     if not os.path.exists(VECTOR_STORE_PATH):
-        logger.error(f"Vector store khong tim thay tai: {VECTOR_STORE_PATH}")
-        logger.info("Chay: python ingestion/vector_data_builder.py")
+        logger.error(f"Vector store không tìm thấy tại: {VECTOR_STORE_PATH}")
+        logger.info("Chạy: python ingestion/vector_data_builder.py")
     else:
         try:
             chatbot_instance = ChatbotRunner(
@@ -133,11 +133,11 @@ async def lifespan(app):
                 llm_provider=DEFAULT_LLM,
             )
             is_ready = True
-            logger.info(f"Chatbot da san sang! LLM: {DEFAULT_LLM}")
+            logger.info(f"Chatbot đã sẵn sàng! LLM: {DEFAULT_LLM}")
         except Exception as e:
-            logger.error(f"Loi khoi tao chatbot: {e}", exc_info=True)
+            logger.error(f"Lỗi khởi tạo chatbot: {e}", exc_info=True)
 
-    yield  # Server dang chay
+    yield
 
     logger.info("Shutting down server...")
 
@@ -146,13 +146,13 @@ async def lifespan(app):
 # FastAPI App
 # ------------------------------------------------------------------
 app = FastAPI(
-    title="Chatbot Kinh Te Viet Nam API",
-    description="API cho he thong RAG Chatbot su dung Energy-Based Distance Retriever",
+    title="Chatbot Kinh Tế Việt Nam API",
+    description="API cho hệ thống RAG Chatbot sử dụng Energy-Based Distance Retriever",
     version="1.0.0",
     lifespan=lifespan,
 )
 
-# CORS — chi cho phep cac origin cu the, khong dung "*" trong production
+# CORS — chỉ cho phép các origin cụ thể, không dùng "*" trong production
 ALLOW_ORIGINS = os.getenv("ALLOW_ORIGINS", "http://localhost:5173,http://localhost:8001").split(",")
 app.add_middleware(
     CORSMiddleware,
@@ -164,22 +164,22 @@ app.add_middleware(
 
 
 # ------------------------------------------------------------------
-# Global Exception Handlers (skill_api_response_standard.md Muc 4)
+# Global Exception Handlers (skill_api_response_standard.md Mục 4)
 # ------------------------------------------------------------------
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """
-    Bat tat ca loi khong mong doi.
-    Dam bao nguoi dung luon nhan duoc JSON, khong bao gio nhan HTML error page.
+    Bắt tất cả lỗi không mong đợi.
+    Đảm bảo người dùng luôn nhận được JSON, không bao giờ nhận HTML error page.
     """
     logger.error(
-        f"Loi khong mong doi tai {request.method} {request.url}: {exc}",
+        f"Lỗi không mong đợi tại {request.method} {request.url}: {exc}",
         exc_info=True
     )
     return JSONResponse(
         status_code=500,
         content=ApiError(
-            message="Loi he thong. Vui long thu lai sau.",
+            message="Lỗi hệ thống. Vui lòng thử lại sau.",
             error_code="INTERNAL_SERVER_ERROR"
         ).model_dump()
     )
@@ -188,8 +188,8 @@ async def global_exception_handler(request: Request, exc: Exception):
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     """
-    Chuan hoa tat ca HTTPException sang ApiError format.
-    Khac phuc truong hop FastAPI mac dinh tra {"detail": "..."} thay vi {"success": false, ...}.
+    Chuẩn hóa tất cả HTTPException sang ApiError format.
+    Khắc phục trường hợp FastAPI mặc định trả {"detail": "..."}.
     """
     return JSONResponse(
         status_code=exc.status_code,
@@ -210,7 +210,7 @@ app.include_router(auth_router, prefix="/api/v1")
 # ------------------------------------------------------------------
 @app.get("/api/health", tags=["System"])
 async def health_check():
-    """Kiem tra trang thai server."""
+    """Kiểm tra trạng thái server."""
     return ApiSuccess(
         data=HealthData(
             status="ready" if is_ready else "initializing",
@@ -224,15 +224,15 @@ async def health_check():
 @app.post("/api/chat", tags=["Chat"])
 async def chat(request: ChatRequest, authorization: str = Header(default=None)):
     """
-    Gui cau hoi va nhan cau tra loi tu chatbot.
-    Tu dong luu lich su neu user da dang nhap (co JWT token).
+    Gửi câu hỏi và nhận câu trả lời từ chatbot.
+    Tự động lưu lịch sử nếu user đã đăng nhập (có JWT token).
 
     Args:
-        request: ChatRequest chua cau hoi.
+        request: ChatRequest chứa câu hỏi.
         authorization: JWT Bearer token (optional).
 
     Returns:
-        ApiSuccess chua ChatResponseData.
+        ApiSuccess chứa ChatResponseData.
     """
     bot = get_chatbot()
 
@@ -240,18 +240,15 @@ async def chat(request: ChatRequest, authorization: str = Header(default=None)):
         raise HTTPException(
             status_code=400,
             detail=ApiError(
-                message="Cau hoi khong duoc de trong.",
+                message="Câu hỏi không được để trống.",
                 error_code="EMPTY_QUESTION"
             ).model_dump()
         )
 
-    # Lay email tu token (neu co)
     user_email = get_user_email_from_token(authorization)
-
     start_time = time.time()
 
     try:
-        # Chuan bi input state
         input_state = {
             "question": request.question,
             "generation": "",
@@ -259,23 +256,21 @@ async def chat(request: ChatRequest, authorization: str = Header(default=None)):
             "prompt": "",
         }
 
-        # Chay workflow
         output_state = bot.compiled_workflow.invoke(input_state)
 
         elapsed = time.time() - start_time
-        answer = output_state.get("generation", "Khong the tao cau tra loi.")
+        answer = output_state.get("generation", "Không thể tạo câu trả lời.")
         docs = output_state.get("documents", [])
 
-        # Format sources
         sources = []
         for doc in docs:
             sources.append({
                 "content": doc.page_content[:500],
-                "source": doc.metadata.get("source", "Khong ro nguon"),
+                "source": doc.metadata.get("source", "Không rõ nguồn"),
                 "full_content": doc.page_content,
             })
 
-        # Luu lich su chat vao DB
+        # Lưu lịch sử chat vào DB nếu user đã đăng nhập
         if user_email:
             try:
                 with UserDB() as db:
@@ -293,7 +288,7 @@ async def chat(request: ChatRequest, authorization: str = Header(default=None)):
                         num_docs=len(docs),
                     )
             except Exception as db_err:
-                logger.warning(f"Khong the luu lich su chat: {db_err}")
+                logger.warning(f"Không thể lưu lịch sử chat: {db_err}")
 
         response_data = ChatResponseData(
             answer=answer,
@@ -304,7 +299,7 @@ async def chat(request: ChatRequest, authorization: str = Header(default=None)):
         )
 
         return ApiSuccess(
-            message="Tra loi thanh cong",
+            message="Trả lời thành công",
             data=response_data.model_dump()
         )
 
@@ -312,11 +307,11 @@ async def chat(request: ChatRequest, authorization: str = Header(default=None)):
         raise
     except Exception as e:
         elapsed = time.time() - start_time
-        logger.error(f"Loi xu ly chat: {e}", exc_info=True)
+        logger.error(f"Lỗi xử lý chat: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail=ApiError(
-                message=f"Loi xu ly: {str(e)}",
+                message=f"Lỗi xử lý: {str(e)}",
                 error_code="CHAT_PROCESSING_ERROR"
             ).model_dump()
         )
@@ -332,15 +327,15 @@ async def get_chat_history(
     authorization: str = Header(default=None),
 ):
     """
-    Lay lich su chat cua user dang dang nhap.
-    Yeu cau JWT token trong Authorization header.
+    Lấy lịch sử chat của user đang đăng nhập.
+    Yêu cầu JWT token trong Authorization header.
     """
     user_email = get_user_email_from_token(authorization)
     if not user_email:
         raise HTTPException(
             status_code=401,
             detail=ApiError(
-                message="Chua dang nhap.",
+                message="Chưa đăng nhập.",
                 error_code="UNAUTHORIZED"
             ).model_dump()
         )
@@ -361,15 +356,15 @@ async def get_chat_history(
 @app.delete("/api/chat/history", tags=["Chat History"])
 async def clear_chat_history(authorization: str = Header(default=None)):
     """
-    Xoa toan bo lich su chat cua user dang dang nhap.
-    Yeu cau JWT token trong Authorization header.
+    Xóa toàn bộ lịch sử chat của user đang đăng nhập.
+    Yêu cầu JWT token trong Authorization header.
     """
     user_email = get_user_email_from_token(authorization)
     if not user_email:
         raise HTTPException(
             status_code=401,
             detail=ApiError(
-                message="Chua dang nhap.",
+                message="Chưa đăng nhập.",
                 error_code="UNAUTHORIZED"
             ).model_dump()
         )
@@ -378,7 +373,7 @@ async def clear_chat_history(authorization: str = Header(default=None)):
         deleted = db.clear_chat_history(user_email)
 
     return ApiSuccess(
-        message="Xoa lich su thanh cong",
+        message="Xóa lịch sử thành công",
         data={"deleted": deleted, "user_email": user_email}
     )
 
@@ -393,7 +388,7 @@ if FRONTEND_DIR.exists():
 
     @app.get("/", tags=["Frontend"])
     async def serve_frontend():
-        """Serve trang chu frontend."""
+        """Serve trang chủ frontend."""
         return FileResponse(str(FRONTEND_DIR / "index.html"))
 
 
@@ -412,5 +407,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=port,
         reload=False,
-        workers=1,  # 1 worker vi model embedding dung chung
+        workers=1,  # 1 worker vì model embedding dùng chung
     )

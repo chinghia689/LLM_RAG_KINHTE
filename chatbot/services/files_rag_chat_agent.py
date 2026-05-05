@@ -1,14 +1,14 @@
 """
-FilesChatAgent: Tac nhan chatbot su dung RAG (Retrieval-Augmented Generation).
+FilesChatAgent: Tác nhân chatbot sử dụng RAG (Retrieval-Augmented Generation).
 
-Nhiem vu:
-    - Nhan cau hoi nguoi dung.
-    - Truy xuat cac tai lieu lien quan tu vector store dung Energy Retriever.
-    - Cham diem va loc ra tai lieu co lien quan.
-    - Sinh cau tra loi dua tren cau hoi + tai lieu da loc.
-    - Xu ly truong hop khong tim thay cau tra loi.
+Nhiệm vụ:
+    - Nhận câu hỏi người dùng.
+    - Truy xuất các tài liệu liên quan từ vector store dùng Energy Retriever.
+    - Chấm điểm và lọc ra tài liệu có liên quan.
+    - Sinh câu trả lời dựa trên câu hỏi + tài liệu đã lọc.
+    - Xử lý trường hợp không tìm thấy câu trả lời.
 
-Quy trinh:
+Quy trình:
     START -> retrieve -> grade_documents -> (generate | handle_no_answer) -> END
 """
 
@@ -29,54 +29,54 @@ logger = get_logger(__name__)
 
 class FilesChatAgent:
     """
-    FilesChatAgent: Tac nhan chatbot su dung RAG (Retrieval-Augmented Generation).
+    FilesChatAgent: Tác nhân chatbot sử dụng RAG (Retrieval-Augmented Generation).
 
-    Nhiem vu:
-        - Nhan cau hoi nguoi dung.
-        - Truy xuat cac tai lieu lien quan tu vector store dung Energy Retriever.
-        - Cham diem va loc ra tai lieu co lien quan.
-        - Sinh cau tra loi dua tren cau hoi + tai lieu da loc.
-        - Xu ly truong hop khong tim thay cau tra loi.
+    Nhiệm vụ:
+        - Nhận câu hỏi người dùng.
+        - Truy xuất các tài liệu liên quan từ vector store dùng Energy Retriever.
+        - Chấm điểm và lọc ra tài liệu có liên quan.
+        - Sinh câu trả lời dựa trên câu hỏi + tài liệu đã lọc.
+        - Xử lý trường hợp không tìm thấy câu trả lời.
 
-    Quy trinh:
+    Quy trình:
         START -> retrieve -> grade_documents -> (generate | handle_no_answer) -> END
     """
 
     def __init__(self, llm_model, path_vector_store, allowed_files=["*"]) -> None:
         """
-        Khoi tao FilesChatAgent.
+        Khởi tạo FilesChatAgent.
 
         Args:
-            llm_model: Mo hinh ngon ngu (LLM) da khoi tao san.
-            path_vector_store (str): Duong dan den vector store chua embeddings.
-            allowed_files (list[str], optional): Danh sach file cho phep. Mac dinh ["*"].
+            llm_model: Mô hình ngôn ngữ (LLM) đã khởi tạo sẵn.
+            path_vector_store (str): Đường dẫn đến vector store chứa embeddings.
+            allowed_files (list[str], optional): Danh sách file cho phép. Mặc định ["*"].
         """
         self.allowed_files = allowed_files
         self.path_vector_store = path_vector_store
 
-        # Cac thanh phan xu ly chinh
+        # Các thành phần xử lý chính
         self.llm = llm_model
         self.document_grader = DocumentGrader(self.llm)
         self.answer_generator = AnswerGeneratorDocs(self.llm)
         
-        # Khoi tao ChromaDB manager de lay retriever
+        # Khởi tạo ChromaDB manager để lấy retriever
         self.embeddings = vn_embedder.get_model()
         self.db_manager = ChromaDBManager(
             embeddings_model=self.embeddings,
             persist_dir=path_vector_store
         )
         
-        # Lay vector store tu ChromaDB
+        # Lấy vector store từ ChromaDB
         self.vector_store = self.db_manager.vector_store
         if not self.vector_store:
-            # Neu chua co, load tu disk
+            # Nếu chưa có, load từ disk
             from langchain_chroma import Chroma
             self.vector_store = Chroma(
                 persist_directory=path_vector_store,
                 embedding_function=self.embeddings
             )
         
-        # Khoi tao Energy Retriever MOT LAN (tranh tao lai moi query)
+        # Khởi tạo Energy Retriever MỘT LẦN (tránh tạo lại mỗi query)
         self.energy_retriever = EnergyRetriever(
             vector_store=self.vector_store,
             embeddings_model=self.embeddings,
@@ -86,84 +86,84 @@ class FilesChatAgent:
 
     def handle_no_answer(self, state: GraphState) -> Dict[str, Any]:
         """
-        Xu ly khi khong co tai lieu lien quan.
+        Xử lý khi không có tài liệu liên quan.
 
         Args:
-            state (GraphState): Trang thai hien tai cua workflow.
+            state (GraphState): Trạng thái hiện tại của workflow.
 
         Returns:
-            Dict[str, Any]: Ket qua bao khong tim thay cau tra loi.
+            Dict[str, Any]: Kết quả báo không tìm thấy câu trả lời.
         """
-        return {"generation": "Xin loi, toi khong tim thay thong tin lien quan trong co so du lieu de tra loi cau hoi cua ban."}
+        return {"generation": "Xin lỗi, tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu để trả lời câu hỏi của bạn."}
 
     def grade_documents(self, state: GraphState) -> Dict[str, Any]:
         """
-        Danh gia muc do lien quan cua cac tai lieu voi cau hoi.
-        Da toi uu: Su dung Batching gop N tai lieu vao 1 prompt.
+        Đánh giá mức độ liên quan của các tài liệu với câu hỏi.
+        Đã tối ưu: Sử dụng Batching gộp N tài liệu vào 1 prompt.
 
         Args:
-            state (GraphState): Trang thai chua documents va question.
+            state (GraphState): Trạng thái chứa documents và question.
 
         Returns:
-            Dict[str, Any]: Danh sach tai lieu da loc.
+            Dict[str, Any]: Danh sách tài liệu đã lọc.
         """
         question = state["question"]
         documents = state["documents"]
 
-        logger.info(f"Dang cham diem hang loat {len(documents)} tai lieu...")
+        logger.info(f"Đang chấm điểm hàng loạt {len(documents)} tài liệu...")
 
-        # Goi ham grade_batch (chi ton 1 API call duy nhat)
+        # Gọi hàm grade_batch (chỉ tốn 1 API call duy nhất)
         filtered_docs = self.document_grader.grade_batch(
             question=question, 
             retrieved_docs=documents
         )
 
-        logger.info(f"Da giu lai {len(filtered_docs)}/{len(documents)} tai lieu lien quan.")
+        logger.info(f"Đã giữ lại {len(filtered_docs)}/{len(documents)} tài liệu liên quan.")
 
         return {"documents": filtered_docs, "question": question}
         
     def decide_to_generate(self, state: GraphState) -> str:
         """
-        Quyet dinh co sinh cau tra loi hay khong dua tren so luong tai lieu loc.
+        Quyết định có sinh câu trả lời hay không dựa trên số lượng tài liệu lọc.
 
         Args:
-            state (GraphState): Trang thai chua documents.
+            state (GraphState): Trạng thái chứa documents.
 
         Returns:
-            str: "generate" hoac "no_document".
+            str: "generate" hoặc "no_document".
         """
         documents = state["documents"]
         
         if not documents:
-            logger.warning("Khong co tai lieu lien quan, chuyen sang xu ly khong co cau tra loi")
+            logger.warning("Không có tài liệu liên quan, chuyển sang xử lý không có câu trả lời")
             return "no_document"
         else:
-            logger.info("Co tai lieu lien quan, tien hanh sinh cau tra loi")
+            logger.info("Có tài liệu liên quan, tiến hành sinh câu trả lời")
             return "generate"
 
     def generate(self, state: GraphState) -> Dict[str, Any]:
         """
-        Sinh cau tra loi tu cau hoi + cac tai lieu da loc.
+        Sinh câu trả lời từ câu hỏi + các tài liệu đã lọc.
 
         Args:
-            state (GraphState): Trang thai chua question, documents, prompt.
+            state (GraphState): Trạng thái chứa question, documents, prompt.
 
         Returns:
-            Dict[str, Any]: Tra ve cau tra loi (generation).
+            Dict[str, Any]: Trả về câu trả lời (generation).
         """
         question = state["question"]
         documents = state["documents"]
-        prompt = state.get("prompt", "Ban la mot chuyen gia tu van kinh te.")
+        prompt = state.get("prompt", "Bạn là một chuyên gia tư vấn kinh tế.")
 
-        # Ghep noi dung cac tai lieu thanh context
+        # Ghép nội dung các tài liệu thành context
         context = "\n\n".join(doc.page_content for doc in documents)
 
-        # Sinh cau tra loi tu AnswerGenerator
+        # Sinh câu trả lời từ AnswerGenerator
         generation = self.answer_generator.get_chain().invoke(
             {"question": question, "context": context, "prompt": prompt}
         )
 
-        # Xoa tag <think> neu co
+        # Xóa tag <think> nếu có
         generation = re.sub(
             r"<think>.*?</think>", "", generation, flags=re.DOTALL
         ).strip()
@@ -172,45 +172,45 @@ class FilesChatAgent:
 
     def retrieve(self, state: GraphState) -> Dict[str, Any]:
         """
-        Truy xuat tai lieu tu vector store dua tren cau hoi, su dung Energy Retriever.
+        Truy xuất tài liệu từ vector store dựa trên câu hỏi, sử dụng Energy Retriever.
 
         Args:
-            state (GraphState): Trang thai chua cau hoi.
+            state (GraphState): Trạng thái chứa câu hỏi.
 
         Returns:
-            Dict[str, Any]: Bao gom "documents" va "question".
+            Dict[str, Any]: Bao gồm "documents" và "question".
         """
         question = state["question"]
 
-        # Lay danh sach documents lien quan dung Energy Distance
+        # Lấy danh sách documents liên quan dùng Energy Distance
         documents = self.energy_retriever.retrieve(query=question)
 
         return {"documents": documents, "question": question}
 
     def get_workflow(self):
         """
-        Xay dung workflow xu ly voi StateGraph.
+        Xây dựng workflow xử lý với StateGraph.
 
-        Luong xu ly:
+        Luồng xử lý:
             START -> retrieve -> grade_documents
                 -> (no_document -> handle_no_answer | generate) -> END
 
         Returns:
-            StateGraph: Workflow da duoc dinh nghia.
+            StateGraph: Workflow đã được định nghĩa.
         """
         workflow = StateGraph(GraphState)
 
-        # Dinh nghia cac node
+        # Định nghĩa các node
         workflow.add_node("retrieve", self.retrieve)
         workflow.add_node("grade_documents", self.grade_documents)
         workflow.add_node("generate", self.generate)
         workflow.add_node("no_document", self.handle_no_answer)
 
-        # Xay dung luong
+        # Xây dựng luồng
         workflow.add_edge(START, "retrieve")
         workflow.add_edge("retrieve", "grade_documents")
         
-        # Quyet dinh dua tren so luong tai lieu
+        # Quyết định dựa trên số lượng tài liệu
         workflow.add_conditional_edges(
             "grade_documents",
             self.decide_to_generate,
